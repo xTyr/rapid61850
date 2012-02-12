@@ -4,16 +4,16 @@
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/emf/src"
     modelPluginID="emf" modelName="SCL" importerID="org.eclipse.xsd.ecore.importer"
     complianceLevel="6.0" copyrightFields="false">
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_BaseSimpleTypes.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_BaseTypes.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_Communication.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_Coordinates.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_DataTypeTemplates.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_Enums.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_IED.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_Maintenance.xsd</foreignModel>
-  <foreignModel>file:/C:/Users/Steven/rapid61850/emf/model/SCL_Substation.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_BaseSimpleTypes.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_BaseTypes.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_Communication.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_Coordinates.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_DataTypeTemplates.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_Enums.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_IED.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_Maintenance.xsd</foreignModel>
+  <foreignModel>file:/home/patrick/rapid61850/emf/model/SCL_Substation.xsd</foreignModel>
   <genPackages prefix="Scl" basePackage="ch.iec._61850._2006" resource="XML" disposableProviderFactory="true"
       loadInitialization="true" literalsInterface="false" ecorePackage="scl.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="scl.ecore#//NameStructureType">

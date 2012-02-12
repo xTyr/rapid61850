@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public abstract class CFile {
-	public final String C_PATH = "..\\c\\src\\";
-	public final String LICENSE_PATH = "src\\scdCodeGenerator\\license.txt";
+	public final String C_PATH = "../c/src/";
+	public final String LICENSE_PATH = "src/scdCodeGenerator/license.txt";
 	public String filename;
 	public List<String> includesLocal;
 	public List<String> includesSystem;

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+ <copyright>
+ </copyright>
+
+ $Id$
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.iec.ch/61850/2006/SCL"
+            class="ch.iec._61850._2006.scl.SclPackage"
+            genModel="model/SCL.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            type="scl"
+            class="ch.iec._61850._2006.scl.util.SclResourceFactoryImpl"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.iec.ch/61850/2006/SCLcoordinates"
+            class="ch.iec._61850._2006.sc.lcoordinates.LcoordinatesPackage"
+            genModel="model/SCL.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            type="lcoordinates"
+            class="ch.iec._61850._2006.sc.lcoordinates.util.LcoordinatesResourceFactoryImpl"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.iec.ch/61850/2006/SCLmaintenance"
+            class="ch.iec._61850._2006.sc.lmaintenance.LmaintenancePackage"
+            genModel="model/SCL.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            type="lmaintenance"
+            class="ch.iec._61850._2006.sc.lmaintenance.util.LmaintenanceResourceFactoryImpl"/>
+   </extension>
+
+</plugin>
