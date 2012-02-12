@@ -80,7 +80,7 @@ public abstract class CFile {
 		
 		try {
 			File f = new File(C_PATH + filename);
-			FileWriter fw = new FileWriter(f);
+			
 			
 			File copyrightTextFile = new File(LICENSE_PATH);
 			//FileReader fr = new FileReader(copyrightTextFile);
@@ -89,7 +89,10 @@ public abstract class CFile {
 		    
 			if (f.exists()) {
 				f.delete();
+				f.createNewFile();
 			}
+			
+			FileWriter fw = new FileWriter(f);
 			
 			String line;
 			while ((line = in.readLine()) != null) {
