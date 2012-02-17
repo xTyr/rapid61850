@@ -18,21 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifdef _WIN32
 #define WPCAP
 #define HAVE_REMOTE
 #define WIN32_LEAN_AND_MEAN
+#endif
 
-#define TEST_LOCAL_SV_GSE	1
+#define TEST_LOCAL_SV_GSE	0
 #define TEST_PERFORMANCE	0
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pcap.h>
+#ifdef _WIN32
 #include <sys/time.h>
+#else
+#include <time.h>
+#include <unistd.h>
+#endif
 #include <math.h>
+#ifdef _WIN32
 #include <windows.h>
-#include <winsock2.h>
+#endif
+
 
 #include "iec61850.h"
 
@@ -45,42 +54,27 @@ char errbuf[PCAP_ERRBUF_SIZE];
 unsigned char buf[BUFFFER_LENGTH] = {0};
 int len = 0;
 
-void DFT(struct simpleSAV *sav, struct simpleVector *vector, int N) {
-	int k = 0;
-	float re = 0, im = 0;
-
-	for (k = 0; k < N; k++) {
-		re += sav[(N - 1) - k].instMag.f * cos(TWO_PI * k / N);
-		im += sav[(N - 1) - k].instMag.f * sin(TWO_PI * k / N);
-	}
-
-	re = re * 2 / N;
-	im = im * 2 / N;
-
-	vector->mag.f = sqrt(re*re + im*im);
-	vector->ang.f = atan2(im, re);
-}
-
 void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data) {
-    if (header->len == 737) {	// hardcoded packet length for demo
-		svDecode((unsigned char *) pkt_data, header->len);
-
-		//DFT(D1Q1SB4.S1.C1.exampleMMXU_1.sv_inputs_rmxuCB.E1Q1SB1_C1_rmxu, &D1Q1SB4.S1.C1.exampleMMXU_1.A.phsA.cVal, 16);
-		//DFT(D1Q1SB4.S1.C1.exampleMMXU_1.sv_inputs_rmxuCB.E1Q1SB1_C1_rmxu, &D1Q1SB4.S1.C1.exampleMMXU_1.A.phsB.cVal, 16);
-		//DFT(D1Q1SB4.S1.C1.exampleMMXU_1.sv_inputs_rmxuCB.E1Q1SB1_C1_rmxu, &D1Q1SB4.S1.C1.exampleMMXU_1.A.phsC.cVal, 16);
-    }
+    gse_sv_packet_filter((unsigned char *) pkt_data, header->len);
 }
 
-pcap_t *initWinpcap() {
+pcap_t *init_pcap() {
 	pcap_t *fpl;
     pcap_if_t *alldevs;
     pcap_if_t *used_if;
 
     /* Retrieve the device list from the local machine */
+#ifdef _WIN32
     if (pcap_findalldevs_ex(PCAP_SRC_IF_STRING, NULL /* auth is not needed */, &alldevs, errbuf) == -1) {
         fprintf(stderr, "Error in pcap_findalldevs_ex: %s\n", errbuf);
         exit(1);
     }
+#else
+    if (pcap_findalldevs(&alldevs, errbuf) == -1) {
+    	fprintf(stderr, "Error in pcap_findalldevs: %s\n", errbuf);
+    	exit(1);
+    }
+#endif
 
     used_if = alldevs;
 
@@ -89,7 +83,7 @@ pcap_t *initWinpcap() {
     	used_if = used_if->next;
     }*/
 
-    fprintf(stdout, "%s\n", used_if->description);
+    fprintf(stdout, "%s\n", used_if->name);
     fflush(stdout);
 
 	if ((fpl = pcap_open_live(used_if->name,		// name of the device
@@ -103,63 +97,16 @@ pcap_t *initWinpcap() {
 		exit(2);
 	}
 
-    //pcap_freealldevs(alldevs);
+    pcap_freealldevs(alldevs);
 
 	return fpl;
 }
 
 int main() {
-	unsigned int loops = 0;
-	unsigned int gooseLoop = 0;
-
-	SOCKET sock;                        // Socket descriptor
-    SOCKET client = INVALID_SOCKET;
-    char tcpBuffer[BUFFFER_LENGTH]; // Buffer for echo string
-    char recvBuffer[BUFFFER_LENGTH]; // Buffer for echo string
     int len = 0;
-    int lenRecv = 0;
-    WSADATA wsaData;                 // Structure for WinSock setup communication
-    struct sockaddr_in sin;
-    int lengthSin = sizeof sin;
-    memset(&sin, 0, lengthSin);
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = INADDR_ANY;
-    sin.sin_port = htons(12345);
-
-    if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0) { // Load Winsock 2.0 DLL
-        fprintf(stderr, "WSAStartup() failed: %d", WSAGetLastError());
-        exit(1);
-    }
-
-    if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == SOCKET_ERROR) {
-        fprintf(stderr, "socket() failed: %d", WSAGetLastError());
-        exit(1);
-    }
-
-    // set socket non-blocking
-    u_long mode = 1;
-    if (ioctlsocket(sock, FIONBIO, &mode) != NO_ERROR) {
-    	printf("ioctlsocket() failed: %d\n", WSAGetLastError());
-    }
-
-    /*BOOL bOptVal = TRUE;
-    int bOptLen = sizeof(BOOL);
-    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&bOptVal, bOptLen) != SOCKET_ERROR) {
-      //printf("Set SO_KEEPALIVE: ON\n");
-    }*/
-
-    if (bind(sock, (struct sockaddr *) &sin, lengthSin) == SOCKET_ERROR) {
-        fprintf(stderr, "bind() failed: %d", WSAGetLastError());
-        exit(1);
-    }
-
-    if (listen(sock, SOMAXCONN) == SOCKET_ERROR) {
-        fprintf(stderr, "listen() failed: %d", WSAGetLastError());
-        exit(1);
-    }
 
 	initialise_iec61850();
-	fp = initWinpcap();
+	fp = init_pcap();
 
 #if TEST_LOCAL_SV_GSE == 1
 	srand(time(NULL));
@@ -214,64 +161,37 @@ int main() {
 #endif
 
 	while (1) {
+		//Receiver
+/*
 		pcap_loop(fp, 1, packet_handler, NULL);    // capture SV packet
-
-		if (++loops >= 16) {
-			loops = 0;
-
-			if (++gooseLoop >= 10) {
-				gooseLoop = 0;
-
-				len = E1Q1SB1.S1.C1.LN0.ItlPositions.send(buf, 0, 512);
-
-				if (pcap_sendpacket(fp, buf, len) != 0) {
-					fprintf(stderr,"\nError sending the packet: %s\n", pcap_geterr(fp));
-				}
-			}
-
-			if (client != INVALID_SOCKET) {
-				len = sprintf(tcpBuffer, "%f %f %f %f %f %f\n", D1Q1SB4.S1.C1.exampleMMXU_1.A.phsA.cVal.mag.f, 180 * D1Q1SB4.S1.C1.exampleMMXU_1.A.phsA.cVal.ang.f / PI, D1Q1SB4.S1.C1.exampleMMXU_1.A.phsB.cVal.mag.f, 180 * D1Q1SB4.S1.C1.exampleMMXU_1.A.phsB.cVal.ang.f / PI, D1Q1SB4.S1.C1.exampleMMXU_1.A.phsC.cVal.mag.f, 180 * D1Q1SB4.S1.C1.exampleMMXU_1.A.phsC.cVal.ang.f / PI);
-				if (send(client, tcpBuffer, len, 0) == SOCKET_ERROR) {
-					client = INVALID_SOCKET;
-					continue;
-				}
-
-				fd_set sockets;					// contains list of sockets for select
-				sockets.fd_count = 1;			// one socket
-				sockets.fd_array[0] = client;	// add it
-				struct timeval timevalInfo;		// tells select how long to wait
-				timevalInfo.tv_sec = 0;
-				timevalInfo.tv_usec = 1;		// wait for 1
-
-				//call select to determine readability of function
-				int sret = select(0, &sockets, NULL, NULL, &timevalInfo);
-
-				if (sret > 0) {
-					lenRecv = recv(client, recvBuffer, 1, 0);
-					if (lenRecv > 0) {
-						if (recvBuffer[0] == '1') {
-							E1Q1SB1.S1.C1.TVTRa_1.Vol.instMag.f = 1;
-						}
-						else {
-							E1Q1SB1.S1.C1.TVTRa_1.Vol.instMag.f = 0;
-						}
-
-						len = E1Q1SB1.S1.C1.LN0.ItlPositions.send(buf, 0, 512);
-
-						if (pcap_sendpacket(fp, buf, len) != 0) {
-							fprintf(stderr,"\nError sending the packet: %s\n", pcap_geterr(fp));
-						}
-					}
-				}
-			}
-			else {
-				client = accept(sock, (struct sockaddr *) &sin, &lengthSin);
-				if (client == SOCKET_ERROR) {
-					client = INVALID_SOCKET;
-				}
+		float gooseIn = D1Q1SB4.S1.C1.RSYNa_1.gse_inputs_ItlPositions.E1Q1SB1_C1_Positions.C1_TVTR_1_Vol_instMag.f;
+		float svIn = D1Q1SB4.S1.C1.exampleMMXU_1.sv_inputs_rmxuCB.E1Q1SB1_C1_rmxu[15].C1_RMXU_1_AmpLocPhsA.instMag.f;
+		printf("GOOSE: %f SV: %f\n", gooseIn, svIn);
+		fflush(stdout);
+*/
+		//Publisher
+		float gooseOut = (float) rand() / (float) RAND_MAX;
+		float svOut = (float) rand() / (float) RAND_MAX;
+		printf("GOOSE: %f SV: %f\n", gooseOut, svOut);
+		fflush(stdout);
+		E1Q1SB1.S1.C1.TVTRa_1.Vol.instMag.f = gooseOut;
+		len = E1Q1SB1.S1.C1.LN0.ItlPositions.send(buf, 1, 512);
+		if (pcap_sendpacket(fp, buf, len) != 0) {
+			fprintf(stderr,"\nError sending the packet: %s\n", pcap_geterr(fp));
+		}
+		E1Q1SB1.S1.C1.exampleRMXU_1.AmpLocPhsA.instMag.f = svOut;
+		int i;
+		for (i = 0; i < E1Q1SB1.S1.C1.LN0.rmxuCB.noASDU; i++) {
+			len = E1Q1SB1.S1.C1.LN0.rmxuCB.update(buf);
+			if(len > 0) {
+				pcap_sendpacket(fp, buf, len);
 			}
 		}
-		Sleep(1);
+#ifdef _WIN32
+		Sleep(1000);
+#else
+		sleep(1);
+#endif
 	}
 
 	pcap_close(fp);

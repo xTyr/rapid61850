@@ -29,7 +29,7 @@ all: goose_sv_publisher
 goose_sv_publisher: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "goose_sv_publisher" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/patrick/rapid61850/c/Lib" -o "goose_sv_publisher" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

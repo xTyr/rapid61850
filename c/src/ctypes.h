@@ -27,7 +27,9 @@ extern "C" {
 
 #include <string.h>
 
+#ifdef _WIN32
 #define LITTLE_ENDIAN			1
+#endif
 #define TIMESTAMP_SUPPORTED		1
 
 #define LOCAL_MAC_ADDRESS_VALUE	{0x01, 0x0C, 0xCD, 0x01, 0x00, 0x02}

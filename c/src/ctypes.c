@@ -22,7 +22,11 @@
 #include "gse.h"
 #include "sv.h"
 #if TIMESTAMP_SUPPORTED == 1
+#ifdef _WIN32
 #include <sys\time.h>
+#else
+#include <time.h>
+#endif
 #endif
 
 unsigned char	LOCAL_MAC_ADDRESS[] = LOCAL_MAC_ADDRESS_VALUE;
